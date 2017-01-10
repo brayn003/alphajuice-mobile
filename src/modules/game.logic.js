@@ -56,6 +56,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	};
 
 	this.generateLetter = function() {
+      console.log('random letter')
 	    var	cumilativeFrequency = 0,
     		randomSeed = (Math.random() * 100),
     		i = 0;
@@ -89,7 +90,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	};
 
 	this.generateRequestArray = function(){
-		console.log("Generate random letter")
+
 		var key = _this.generateNumber();
 		var value = _this.generateLetter();
 		var limit = 10;
@@ -103,7 +104,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 			if( _this.audience.request[key] === null || _this.audience.request[key] === undefined){
 				_this.audience.request[key]= value;
 
-				// _this.emit("request",{"key": key, "value": value});
+				_this.emit("request",{"key": key, "value": value});
 			}
 		}
 
