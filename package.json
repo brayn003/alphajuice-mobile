@@ -1,0 +1,32 @@
+{
+  "name": "alphajuice-mobile",
+  "version": "1.0.0",
+  "description": "the craziest game ever",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brayn003/alphajuice-mobile.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brayn003/alphajuice-mobile/issues"
+  },
+  "homepage": "https://github.com/brayn003/alphajuice-mobile#readme",
+  "devDependencies": {
+    "browser-sync": "^2.18.6",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^2.0.0"
+  },
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "phaser": "^2.6.2",
+    "qjs": "0.0.2",
+    "rxjs": "^5.0.3"
+  }
+}
