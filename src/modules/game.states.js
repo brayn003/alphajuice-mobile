@@ -1,17 +1,20 @@
-function phaserGame() {
-  return {
-    init : init,
-    addState : addState,
-    startState : startState
-  }
+// var app = 
+var phaserGame = new Phaser.Game("100","100",Phaser.AUTO,'');
 
-  var phaserGame;
+(function() {
+  // return {
+  //   init : init,
+  //   addState : addState,
+  //   startState : startState
+  // }
 
-  function init(){
-    phaserGame = new Phaser.Game("100","100",Phaser.AUTO,'');
+  // var phaserGame;
+
+  // function init(){
+    // phaserGame = new Phaser.Game("100","100",Phaser.AUTO,'');
     // phaserGame.state.add('playState',playState);
     // phaserGame.state.start('playState');
-  }
+  // }
 
   function addState(stateName,state){
     phaserGame.state.add(stateName,state);
@@ -21,9 +24,11 @@ function phaserGame() {
     phaserGame.state.start(stateName);
   }
 
-}
+  // init();
+  addState('loaderState',loaderState());
+  addState('dashState',dashState());
+  addState('playState',playState());
+  // console.log(dashState());
+  startState('loaderState')
 
-var gamePlay = new phaserGame();
-gamePlay.init();
-gamePlay.addState('playState',playState());
-gamePlay.startState('playState')
+}())

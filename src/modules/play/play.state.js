@@ -2,46 +2,31 @@ function playState(){
 
 
   var rightSpotlight, leftSpotlight, middleSpotlight;
-  var bubblePoints, bubbles, bubbleText,mixer,table;
-  var scoreText, multiplerText;
+  var bubblePoints, bubbleText,mixer,table;
+  var scoreText, multiplierText;
   var game, game_scale;
-  var style = { font: "48px Quenda", fill: "#2C264E", align: "center"};
+  var style = { font: "20px Boogaloo", fill: "#2C264E", align: "center"};
   var	crowdFirst, crowdSecond, crowdThirdLeft, crowdThirdRight;
-  
+  var bubbles ={}
+  var alphaJuice;
   // module['playState'] = playState;
   return {
     preload: function(){
-      this.alphaJuice = new gameLogic('data/letter-frequency.json','data/wordlist.json');
-      this.alphaJuice.init();
-      this.load.image('background','../assets/images/background.png');
+    alphaJuice = new gameLogic('data/letter-frequency.json','data/wordlist.json');
 
-      //Light
-      this.load.image('left-spotlight','../assets/images/left-spotlight.png');
-      this.load.image('middle-spotlight','../assets/images/middle-spotlight.png');
-      this.load.image('right-spotlight','../assets/images/right-spotlight.png');
-
-      //Crowd
-      this.load.image('crowd-first','../assets/images/crowd_first.png');
-      // this.load.image('crowd-first-right','../assets/images/crowd_first_right.png');
-      // this.load.image('crowd-first-middle','../assets/images/crowd_first_middle.png');
-      this.load.image('crowd-second','../assets/images/crowd_second.png');
-      this.load.image('crowd-third-left','../assets/images/crowd_third_left.png');
-      this.load.image('crowd-third-right','../assets/images/crowd_third_right.png');
-      this.load.image('rod','../assets/images/rod.png');
-
-      //Bubble
-      this.load.image('bubbles','../assets/images/bubble.png');
-
-      //Mixer
-      this.load.image('mixer','../assets/images/mixer.png');
-      this.load.spritesheet('mixer_animation', '../assets/images/mixer_animation.png', 271, 423);
-
-      //Table
-      this.load.image('table','../assets/images/table.png');
     },
     create: function(){
+      console.log('boom',alphaJuice)
       console.log('start game')
-    this.alphaJuice.startRequest();
+      alphaJuice.init().then(function(){
+        alphaJuice.startRequest();
+      });
+      var letterGenArray = [];
+      var letterClicked = {};
+      var bubbleClicked = {};
+      var letterClickCount = 0;
+      var lastValidWord = '';
+
 
       var _this = this
       game = this.game;
@@ -49,7 +34,7 @@ function playState(){
       game_scale = game.world.height / background.height;
       background.anchor.setTo(0.5,0.5);
       background.scale.setTo(game_scale, game_scale);
-
+      var bubblesBg = {};
       this.game.world.setBounds(0, 0, game.width, game.height);
 
       var rod_points = [
@@ -100,15 +85,15 @@ function playState(){
       crowdFirst.scale.setTo(game_scale, game_scale);
       this.add.tween(crowdFirst).to({ y: [380*game_scale,330*game_scale]},850, 'Cubic.easeOut', true, 0).loop(true);
 
-      for (var i = 0; i < rod_points.length; i++) {
-        var rod = game.add.sprite(rod_points[i].x, rod_points[i].y,'rod');
-        rod.anchor.setTo(rod_points[i].anchor_x,rod_points[i].anchor_y);
-        if (rod_points[i].mirror == 1) {
-          rod.scale.setTo(-game_scale, game_scale);
-        }else {
-          rod.scale.setTo(game_scale, game_scale);
-        }
-      }
+      // for (var i = 0; i < rod_points.length; i++) {
+      //   var rod = game.add.sprite(rod_points[i].x, rod_points[i].y,'rod');
+      //   rod.anchor.setTo(rod_points[i].anchor_x,rod_points[i].anchor_y);
+      //   if (rod_points[i].mirror == 1) {
+      //     rod.scale.setTo(-game_scale, game_scale);
+      //   }else {
+      //     rod.scale.setTo(game_scale, game_scale);
+      //   }
+      // }
 
       
 
@@ -119,8 +104,8 @@ function playState(){
       // var style = { font: "32px Arial", fill: "#ff0044", align: "center", backgroundColor: "#ffff00" };
 
       // for (var i = 0; i < bubblePoints.x.length; i++) {
-      // 	var bubbles = game.add.sprite(bubblePoints.x[i],bubblePoints.y[i],'bubbles');
-      // 	bubbles.scale.setTo(game_scale * 0.6, game_scale * 0.6);
+      // 	var bubblesBg = game.add.sprite(bubblePoints.x[i],bubblePoints.y[i],'bubblesBg');
+      // 	bubblesBg.scale.setTo(game_scale * 0.6, game_scale * 0.6);
 
 
       // }
@@ -131,62 +116,118 @@ function playState(){
         
       },400);
       //Score
-      var multiplerstyle = { font: "20px Quenda", fill: "#FFD700", align: "center"};
-      multiplerText = game.add.text(0,0,this.alphaJuice.multipler+" X ",multiplerstyle);
-      multiplerText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 5);
+      // var multiplerstyle = { font: "20px Boogaloo", fill: "#FFD700", align: "center"};
+      var scoreTextStyle = { font: "20px Boogaloo", fill: "#FFD700", align: "center"};
 
-      var scorestyle =  { font: "50px Quenda", fill: "#FFD700", align: "center" };
-      scoreText = game.add.text(multiplerText.width,0,this.alphaJuice.score,scorestyle);
-      scoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 5);
+      setTimeout(function(){
+        multiplierText = game.add.text(60*game_scale,150*game_scale,alphaJuice.multiplier+' x ',scoreTextStyle);
+        multiplierText.anchor.setTo(0,1)
+        scoreTextStyle.font = "50px Boogaloo";
+        scoreText = game.add.text(multiplierText.x+multiplierText.width, 165*game_scale, alphaJuice.score, scoreTextStyle);
+        scoreText.anchor.setTo(0,1)
+      },3000)
+      // multiplierText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 5);
 
-      multiplerText.position.y = scoreText.height - multiplerText.height - 9;
+      // var scorestyle =  { font: "50px Boogaloo", fill: "#FFD700", align: "center" };
+      // scoreText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 5);
+
+      // multiplierText.position.y = scoreText.height - multiplierText.height - 9;
 
       //Bottom word text
-      var wordStyle = { font: "30px Quenda", fill: "#28B463", backgroundColor: "#FCF3CF" ,align: "center" };
-      wordText = game.add.text(0,0,"g",wordStyle);
-      wordText.position.y=game.height - wordText.height;
-      wordText.setText("");
+      // var wordStyle = { font: "30px Boogaloo", fill: "#28B463", backgroundColor: "#FCF3CF" ,align: "center" };
+      // wordText = game.add.text(0,0,"g",wordStyle);
+      // wordText.position.y=game.height - wordText.height;
+      // wordText.setText("");
 
       //table
-      table = game.add.sprite(0,0,'table');
+      table = game.add.sprite(game.width/2,game.height+100*game_scale,'table');
+      table.anchor.setTo(0.5,1);
       table.scale.setTo(game_scale,game_scale);
-      table.position.x = (game.width/2)- (table.width/2);
-      table.position.y = game.height - table.height;
+      // table.position.x = (game.width/2)- (table.width/2);
+      // table.position.y = game.height - table.height;
 
-      var mixer, mixerAnimate, mixerShake;
+      // var mixer, mixerAnimate, mixerShake;
 
-      function animateMixer(){
-        mixer.destroy();
-        mixerAnimate = game.add.sprite(0,0,'mixer_animation');
-      mixerShake = mixerAnimate.animations.add('mixerShake');
-      mixerAnimate.scale.setTo(game_scale, game_scale);
-      mixerAnimate.anchor.setTo(0.5,1);
-      mixerAnimate.position.x = 2*game.width/5;
-      mixerAnimate.position.y = game.height;
-          mixerAnimate.animations.play('mixerShake', 36, false);
-          mixerShake.onComplete.add(function(){
-            mixerAnimate.destroy();
-            staticMixer();
-          }, this);
-      }
+      // function animateMixer(){
+      //   mixer.destroy();
+      //   mixerAnimate = game.add.sprite(0,0,'mixer_animation');
+      // mixerShake = mixerAnimate.animations.add('mixerShake');
+      // mixerAnimate.scale.setTo(game_scale, game_scale);
+      // mixerAnimate.anchor.setTo(0.5,1);
+      // mixerAnimate.position.x = 2*game.width/5;
+      // mixerAnimate.position.y = game.height;
+      //     mixerAnimate.animations.play('mixerShake', 36, false);
+      //     mixerShake.onComplete.add(function(){
+      //       mixerAnimate.destroy();
+      //       staticMixer();
+      //     }, this);
+      // }
       
-    function staticMixer(){
-      mixer = game.add.sprite(0,0,'mixer');
-        mixer.scale.setTo(game_scale, game_scale);
-        mixer.position.x = 2*game.width/5 - 1;
-        mixer.position.y = game.height-63;
-      mixer.inputEnabled = true;
-      mixer.anchor.setTo(0.5,1);
-        mixer.events.onInputDown.add(function(mixer){
-          _this.alphaJuice.mixerClickListener(scoreText,multiplerText);
-          animateMixer();
-        });
-    }
+      function staticMixer(){
+        var mixer = game.add.sprite(game.width/2-250*game_scale,game.height-60*game_scale,'mixer');
+        mixer.scale.setTo(0.8*game_scale,0.8* game_scale);
+        // mixer.position.x = 2*game.width/5 - 1;
+        // mixer.position.y = game.height-63;
+        mixer.inputEnabled = true;
+        mixer.anchor.setTo(0.5,1);
+        mixer.animations.add('mixerShake',[1]);
+        mixer.events.onInputDown.add(onMixerClick);
+      }
+
+      function onMixerClick(mixer){
+        // function(){
+          // console.log('clicked on mixer');
+          // alphaJuice.mixerClickListener(scoreText,multiplierText);
+        if(!jQuery.isEmptyObject(bubbleClicked)){
+          mixer.animations.play('mixerShake',30, false);
+          var tempWordArray = [],
+              tempWord = '',
+              i = 0;
+          for(key in bubbleClicked){
+            // console.log(tempWord,bubbleClicked[key].data.value,i)
+            tempWordArray[bubbleClicked[key].data.sequence] = bubbleClicked[key].data.value;
+          }
+          tempWord = tempWordArray.join("")
+          if(alphaJuice.isWordVaild(tempWord)){
+            console.log('word valid');
+            scoreText.text = alphaJuice.updateScore(tempWord);
+            multiplierText.text = alphaJuice.incrementMultiplier()+' X ';
+            acceptWord();
+            alphaJuice.startRequest();
+          }else{
+            console.log('not valid')
+            resetClickedBubble();
+          }
+            // console.log('clicked on mixer',tempWord.join(''),'hello');
+          // }
+        }
+      }
+
+      function acceptWord(){
+        for(key in bubbleClicked){
+          alphaJuice.removeLetterByIndex(bubbleClicked[key].data.key);
+          bubbleClicked[key].group.removeAll()
+          delete letterGenArray[bubbleClicked[key].data.key];
+          delete bubbleClicked[key];
+          letterClickCount = 0;
+        }
+      }
+
+      // function removeClickBubble(bubbleGroup){
+      // }
+
+      function resetClickedBubble(){
+        for (key in bubbleClicked){
+          game.add.tween(bubbleClicked[key].group).to({ x: bubbleClicked[key].origPosition.x, y: bubbleClicked[key].origPosition.y },400, Phaser.Easing.Cubic.Out, true, 0);
+          delete bubbleClicked[key];
+          letterClickCount = 0;
+        }
+      }
       //mixer
       staticMixer();
 
     //Background Music
-      var bgAudio = new Audio('../assets/sounds/bg.ogg');
+      var bgAudio = new Audio('assets/sounds/bg.ogg');
       bgAudio.addEventListener('ended', function() {
         this.currentTime = 0;
         this.play();
@@ -198,21 +239,81 @@ function playState(){
       });
 
     //bubble gen
-      this.alphaJuice.on("request", function(event,data){
+      function generateBubble(event, data){
+        letterGenArray[data.key]=data.value;
 
-      var bubbles = game.add.sprite(bubblePoints.x[data.key]*game_scale*0.8,game.height-bubblePoints.y[data.key]*game_scale*0.8,'bubbles');
-        bubbles.scale.setTo(game_scale * 0.7, game_scale * 0.7);
-        bubbles.anchor.setTo(0.5,0.5);
-        bubbles.inputEnabled=true;
-      bubbles.name = data.key;
-        // console.log(this.alphaJuice.audience.request[i]);
-      var bubbleText = game.add.text(bubblePoints.x[data.key]*game_scale*0.8,game.height-(bubblePoints.y[data.key]*game_scale*0.825), data.value, style);
-        bubbleText.anchor.setTo(0.5,0.5);
-        bubbles.events.onInputDown.add(function(bubble){
-          _this.alphaJuice.bubbleClickListener(bubble,bubbleText,_this.game);
-      });
+        var bubble = game.add.group();
 
-      });
+
+        //creating bubble background
+        // alphaJuice.generateLetter(1,5);
+        var bubblesBg = bubble.create(0,0,'bubble-'+alphaJuice.generateNumber(1,5));
+        bubblesBg.scale.setTo(game_scale, game_scale);
+        // bubblesBg.anchor.setTo(0.5,0.5);
+        bubblesBg.inputEnabled=true;
+        // bubblesBg.name = data.key;
+        
+        //creating bubble text        
+        // bubbleText.anchor.setTo(0.5,0.5);
+        bubble.x = bubblePoints.x[data.key]*game_scale*0.8;
+        bubble.y = game.height-bubblePoints.y[data.key]*game_scale*0.8;
+        data['id'] = data.key + data.value;
+        
+        var bubbleText = game.add.text(bubblesBg.width/2,bubblesBg.height/2, data.value, style);
+        bubbleText.anchor.setTo(0.5,0.5)
+        
+        //on click bubble add
+        bubble.add(bubbleText)
+        bubblesBg.events.onInputDown.add(onBubbleClick,{data : data, group : bubble});
+        return bubble;
+      }
+
+
+      function onBubbleClick(bubbleBg){
+          var bubble = this;
+
+          console.log(this)
+          if(bubbleClicked[bubble.data.id] != undefined){
+            // console.log('already clicked')
+            game.add.tween(bubble.group).to({ x: bubble.origPosition.x, y: bubble.origPosition.y},400, Phaser.Easing.Cubic.Out, true, 0);
+            // game.add.tween(bubbleText).to({ x: bubble.origPosition.x, y: bubble.origPosition.y},400, Phaser.Easing.Cubic.Out, true, 0);
+            delete bubble.origPosition;
+            delete bubbleClicked[bubble.data.id];
+            console.log(bubble.data.sequence);
+            for(var id in bubbleClicked){
+              // console.log('yahoo');
+              console.log('bubbleClicked',bubbleClicked[id].data.sequence,bubble.data.sequence)
+              if(bubbleClicked[id].data.sequence > bubble.data.sequence){
+              console.log('rearranging ...',bubbleClicked[id].data.sequence,bubble.data.sequence);
+                bubbleClicked[id].data.sequence -= 1;
+                game.add.tween(bubbleClicked[id].group).to({ x: "-"+bubbleBg.width },400, Phaser.Easing.Cubic.Out, true, 0);
+              }
+            }
+            letterClickCount--;
+          }else{
+            // console.log('not clikced')
+            bubble['origPosition'] = {
+              x : bubble.group.x,
+              y : bubble.group.y
+            };
+
+
+            bubbleClicked[bubble.data.id] = bubble;
+            bubbleClicked[bubble.data.id].data['sequence'] = letterClickCount;
+            // console.log('CLICKED',wordGenArray,letterCliked);
+            game.add.tween(bubble.group).to({ x: 100+ (letterClickCount * bubbleBg.width), y: (game.height - bubbleBg.height)},400, Phaser.Easing.Cubic.Out, true, 0);
+            // game.add.tween(bubbleText).to({ x: 100+ (letterClickCount * bubble.width), y: (game.height - bubble.height)},400, Phaser.Easing.Cubic.Out, true, 0);
+            letterClickCount++;  
+          }
+          console.log('click',bubbleClicked);
+      }
+          // console.log('WORD',wordGenArray,bubbleClicked);
+
+
+        // function sortbubbleClicked(sequence){
+        // }
+
+      alphaJuice.on("request", generateBubble);
 
   },
     update: function(){
