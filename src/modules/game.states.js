@@ -28,6 +28,7 @@ var phaserGame = new Phaser.Game("100","100",Phaser.AUTO,'');
   addState('loaderState',loaderState());
   addState('dashState',dashState());
   addState('playState',playState());
+  addState('endState',endState());
   // console.log(dashState());
   startState('loaderState')
 

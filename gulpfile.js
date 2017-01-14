@@ -9,8 +9,9 @@ var PATH = {
 			vendor : [
 				'./node_modules/jquery/dist/jquery.min.js',
 				'./node_modules/phaser/build/phaser.min.js',
+				'./node_modules/phaser-state-transition/dist/phaser-state-transition.min.js',
 				'./node_modules/rx/dist/rx.min.js',
-				'./node_modules/q/q.js'
+				'./node_modules/q/q.js',
 			]
 		},
     src : './src/',

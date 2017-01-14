@@ -33,6 +33,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	this.multiplier = 1;
 	this.currentWordX = 50;
 	this.userText = {};
+	this.generating = 0;
 
 	// this.requestInterval;
 	var scoreGroupLimit = {
@@ -88,12 +89,16 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	};
 
 	this.startRequest = function(){
-		if(generating == 1){
-			return;
+		// if(generating == 1){
+		// 	return;
+		// }
+		console.log('request recieved')
+		if(this.generating == 0){
+			console.log('request recieved 2')
+			this.generating = 1;
+			_this.requestInterval = setInterval(_this.generateRequestArray, 1000);
 		}
-		generating = 1;
-		_this.requestInterval = setInterval(_this.generateRequestArray, 1000);
-		generating = 0;
+		// generating = 0;
 							// .then(function(){
 							// 	requestInterval = undefined;
 							// });
@@ -108,7 +113,8 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 		// console.log("CHECK",_this.audience.request.filter(function(x){ return true }).length > limit-1);
 
 		if(_this.audience.request.filter(function(x){ return true }).length > limit-1) {
-			clearInterval(_this.requestInterval);
+			console.log(clearInterval(_this.requestInterval),"hello");
+			_this.generating = 0;
 			// console.log("CANNED", isCanned)
 			console.log('Stopping');
 			return;
@@ -125,6 +131,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 		// 	generateRequestArray();
 		// }
 		// alert(JSON.stringify(req));
+		console.log(_this.audience.request)
 	};
 
 	// this.indexof = function(){
@@ -149,7 +156,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	}
 
 	this.isWordVaild = function(word){
-		console.log('hello')
+		// console.log('hello')
 		return _this.wordlist.indexOf(word) != -1
 	}
 
@@ -196,7 +203,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	this.getScoreOfLetter = function(letter){
 		var score = 0,
 				freq = Math.round(_this.getFrequencyOfLetter(letter));
-				console.log('frequency',freq)
+				// console.log('frequency',freq)
 		if(freq > 3){
 			return 10;
 		}else if(freq > 0 && freq <= 3){
@@ -221,7 +228,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 	}
 
 	this.updateScore = function(word){
-		console.log(_this.multiplier,_this.getScoreOfWord(word),_this.multiplier*_this.getScoreOfWord(word));
+		// console.log(_this.multiplier,_this.getScoreOfWord(word),_this.multiplier*_this.getScoreOfWord(word));
 		_this.score += (_this.multiplier*_this.getScoreOfWord(word));
 		return _this.score;
 	}
@@ -230,7 +237,7 @@ function gameLogic(letterFrequencyJson,wordlistJson){
 		_this.multiplier = 1;
 		var tempWord = 'abcdefghijklmnopqrstuvwxyz';
 		for(var i = 0; i < tempWord.length; i++){
-			console.log(tempWord[i],_this.getFrequencyOfLetter(tempWord[i]),1/_this.getFrequencyOfLetter(tempWord[i]),_this.getScoreOfLetter(tempWord[i]));
+			// console.log(tempWord[i],_this.getFrequencyOfLetter(tempWord[i]),1/_this.getFrequencyOfLetter(tempWord[i]),_this.getScoreOfLetter(tempWord[i]));
 		}
 	}
 	// this.getScoreChart()

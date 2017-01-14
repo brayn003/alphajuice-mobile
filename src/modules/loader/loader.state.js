@@ -29,16 +29,22 @@ function loaderState(){
     this.load.image('bubble-2','assets/images/bubble2.png');
     this.load.image('bubble-3','assets/images/bubble3.png');
     this.load.image('bubble-4','assets/images/bubble4.png');
-    this.load.image('bubble-5','assets/images/bubble5.png');
-    this.load.image('bubble-6','assets/images/bubble6.png');
+    this.load.image('star','assets/images/star.png');
+    // this.load.image('bubble-5','assets/images/bubble5.png');
+    // this.load.image('bubble-6','assets/images/bubble6.png');
 
     //Mixer
     // this.load.image('mixer','assets/images/mixer.png');
 
-    this.load.spritesheet('mixer', 'assets/images/mixer.png', 323, 497);
+    this.load.spritesheet('mixer', 'assets/images/mixer.png', 360, 580);
 
     //Table
     this.load.image('table','assets/images/table.png');
+
+    //dj
+    this.load.spritesheet('dj','assets/images/dj.png', 210, 460);
+
+    this.load.audio('bgAudio', ['assets/sounds/bg.ogg']);
   }
 
   function create(){

@@ -2,22 +2,23 @@ function playState(){
 
 
   var rightSpotlight, leftSpotlight, middleSpotlight;
-  var bubblePoints, bubbleText,mixer,table;
-  var scoreText, multiplierText;
+  var bubblePoints, bubbleText, mixer, table, dj;
+  var scoreText, multiplierText, timerText, timerCircle;
   var game, game_scale;
+  var bgAudio;
   var style = { font: "20px Boogaloo", fill: "#2C264E", align: "center"};
   var	crowdFirst, crowdSecond, crowdThirdLeft, crowdThirdRight;
   var bubbles ={}
   var alphaJuice;
   // module['playState'] = playState;
-  return {
-    preload: function(){
+    function preload(){
     alphaJuice = new gameLogic('data/letter-frequency.json','data/wordlist.json');
 
-    },
-    create: function(){
-      console.log('boom',alphaJuice)
-      console.log('start game')
+    };
+
+    function create(){
+      // console.log('boom',alphaJuice)
+      // console.log('start game')
       alphaJuice.init().then(function(){
         alphaJuice.startRequest();
       });
@@ -26,6 +27,8 @@ function playState(){
       var bubbleClicked = {};
       var letterClickCount = 0;
       var lastValidWord = '';
+      var timer = 30;
+      var timerFunc;
 
 
       var _this = this
@@ -98,17 +101,14 @@ function playState(){
       
 
       bubblePoints = {
-        'x' : [165,275,514,638,824,1091,1281,1501,1610,1710],
-        'y' : [545,701,572,761,694,644,588,660,400,547]
+        'x' : [-150,-350,-500,-700,-600,400,50,550,600,750],
+        'y' : [400,350,500,450,700,350,200,750,500,400]
       }
-      // var style = { font: "32px Arial", fill: "#ff0044", align: "center", backgroundColor: "#ffff00" };
-
-      // for (var i = 0; i < bubblePoints.x.length; i++) {
-      // 	var bubblesBg = game.add.sprite(bubblePoints.x[i],bubblePoints.y[i],'bubblesBg');
-      // 	bubblesBg.scale.setTo(game_scale * 0.6, game_scale * 0.6);
-
-
+      
+      // for(var i = 0; i< 10; i++){
+      //   generateBubble(this,{key : i, value : 'a'});
       // }
+
       setInterval(function(){
         leftSpotlight.tint = Math.random() * 0xffffff;
         rightSpotlight.tint = Math.random() * 0xffffff;
@@ -117,15 +117,15 @@ function playState(){
       },400);
       //Score
       // var multiplerstyle = { font: "20px Boogaloo", fill: "#FFD700", align: "center"};
-      var scoreTextStyle = { font: "20px Boogaloo", fill: "#FFD700", align: "center"};
 
-      setTimeout(function(){
-        multiplierText = game.add.text(60*game_scale,150*game_scale,alphaJuice.multiplier+' x ',scoreTextStyle);
+      // setTimeout(function(){
+        var scoreTextStyle = { font: "30px Boogaloo", fill: "#FFD700", align: "center"};
+        multiplierText = game.add.text(60*game_scale,180*game_scale,alphaJuice.multiplier+' x ',scoreTextStyle);
         multiplierText.anchor.setTo(0,1)
         scoreTextStyle.font = "50px Boogaloo";
-        scoreText = game.add.text(multiplierText.x+multiplierText.width, 165*game_scale, alphaJuice.score, scoreTextStyle);
+        scoreText = game.add.text(multiplierText.x+multiplierText.width, 200*game_scale, alphaJuice.score, scoreTextStyle);
         scoreText.anchor.setTo(0,1)
-      },3000)
+      // },3000)
       // multiplierText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 5);
 
       // var scorestyle =  { font: "50px Boogaloo", fill: "#FFD700", align: "center" };
@@ -164,14 +164,21 @@ function playState(){
       // }
       
       function staticMixer(){
-        var mixer = game.add.sprite(game.width/2-250*game_scale,game.height-60*game_scale,'mixer');
-        mixer.scale.setTo(0.8*game_scale,0.8* game_scale);
+        mixer = game.add.sprite(game.width/2-250*game_scale,game.height,'mixer');
+        mixer.scale.setTo(0.9*game_scale,0.9* game_scale);
         // mixer.position.x = 2*game.width/5 - 1;
         // mixer.position.y = game.height-63;
         mixer.inputEnabled = true;
         mixer.anchor.setTo(0.5,1);
-        mixer.animations.add('mixerShake',[1]);
         mixer.events.onInputDown.add(onMixerClick);
+      }
+
+      function animateMixer(){
+          mixer.animations.add('mixerShake');
+          var anim = mixer.animations.play('mixerShake',30, false);
+          anim.onComplete.add(function(){
+            mixer.frame = 0;
+          })
       }
 
       function onMixerClick(mixer){
@@ -179,7 +186,6 @@ function playState(){
           // console.log('clicked on mixer');
           // alphaJuice.mixerClickListener(scoreText,multiplierText);
         if(!jQuery.isEmptyObject(bubbleClicked)){
-          mixer.animations.play('mixerShake',30, false);
           var tempWordArray = [],
               tempWord = '',
               i = 0;
@@ -189,11 +195,15 @@ function playState(){
           }
           tempWord = tempWordArray.join("")
           if(alphaJuice.isWordVaild(tempWord)){
+            animateMixer();
             console.log('word valid');
             scoreText.text = alphaJuice.updateScore(tempWord);
             multiplierText.text = alphaJuice.incrementMultiplier()+' X ';
             acceptWord();
+            // resetTimer();
             alphaJuice.startRequest();
+            pauseTimer();
+            startTimer();
           }else{
             console.log('not valid')
             resetClickedBubble();
@@ -227,16 +237,7 @@ function playState(){
       staticMixer();
 
     //Background Music
-      var bgAudio = new Audio('assets/sounds/bg.ogg');
-      bgAudio.addEventListener('ended', function() {
-        this.currentTime = 0;
-        this.play();
-      }, false);
-      bgAudio.play();
-
-      window.addEventListener("beforeunload", function(e){
-        _this.bgAudio.stop();
-      });
+      
 
     //bubble gen
       function generateBubble(event, data){
@@ -247,7 +248,7 @@ function playState(){
 
         //creating bubble background
         // alphaJuice.generateLetter(1,5);
-        var bubblesBg = bubble.create(0,0,'bubble-'+alphaJuice.generateNumber(1,5));
+        var bubblesBg = bubble.create(-60*game_scale,-90*game_scale,'bubble-'+alphaJuice.generateNumber(1,4));
         bubblesBg.scale.setTo(game_scale, game_scale);
         // bubblesBg.anchor.setTo(0.5,0.5);
         bubblesBg.inputEnabled=true;
@@ -255,11 +256,11 @@ function playState(){
         
         //creating bubble text        
         // bubbleText.anchor.setTo(0.5,0.5);
-        bubble.x = bubblePoints.x[data.key]*game_scale*0.8;
-        bubble.y = game.height-bubblePoints.y[data.key]*game_scale*0.8;
+        bubble.x = game.width/2 + bubblePoints.x[data.key]*game_scale;
+        bubble.y = bubblePoints.y[data.key]*game_scale;
         data['id'] = data.key + data.value;
         
-        var bubbleText = game.add.text(bubblesBg.width/2,bubblesBg.height/2, data.value, style);
+        var bubbleText = game.add.text(0,0, data.value, style);
         bubbleText.anchor.setTo(0.5,0.5)
         
         //on click bubble add
@@ -272,26 +273,26 @@ function playState(){
       function onBubbleClick(bubbleBg){
           var bubble = this;
 
-          console.log(this)
+          // console.log(this)
           if(bubbleClicked[bubble.data.id] != undefined){
-            // console.log('already clicked')
+            // // console.log('already clicked')
             game.add.tween(bubble.group).to({ x: bubble.origPosition.x, y: bubble.origPosition.y},400, Phaser.Easing.Cubic.Out, true, 0);
             // game.add.tween(bubbleText).to({ x: bubble.origPosition.x, y: bubble.origPosition.y},400, Phaser.Easing.Cubic.Out, true, 0);
             delete bubble.origPosition;
             delete bubbleClicked[bubble.data.id];
-            console.log(bubble.data.sequence);
+            // console.log(bubble.data.sequence);
             for(var id in bubbleClicked){
-              // console.log('yahoo');
-              console.log('bubbleClicked',bubbleClicked[id].data.sequence,bubble.data.sequence)
+              // // console.log('yahoo');
+              // console.log('bubbleClicked',bubbleClicked[id].data.sequence,bubble.data.sequence)
               if(bubbleClicked[id].data.sequence > bubble.data.sequence){
-              console.log('rearranging ...',bubbleClicked[id].data.sequence,bubble.data.sequence);
+              // console.log('rearranging ...',bubbleClicked[id].data.sequence,bubble.data.sequence);
                 bubbleClicked[id].data.sequence -= 1;
                 game.add.tween(bubbleClicked[id].group).to({ x: "-"+bubbleBg.width },400, Phaser.Easing.Cubic.Out, true, 0);
               }
             }
             letterClickCount--;
           }else{
-            // console.log('not clikced')
+            // // console.log('not clikced')
             bubble['origPosition'] = {
               x : bubble.group.x,
               y : bubble.group.y
@@ -300,14 +301,14 @@ function playState(){
 
             bubbleClicked[bubble.data.id] = bubble;
             bubbleClicked[bubble.data.id].data['sequence'] = letterClickCount;
-            // console.log('CLICKED',wordGenArray,letterCliked);
-            game.add.tween(bubble.group).to({ x: 100+ (letterClickCount * bubbleBg.width), y: (game.height - bubbleBg.height)},400, Phaser.Easing.Cubic.Out, true, 0);
+            // // console.log('CLICKED',wordGenArray,letterCliked);
+            game.add.tween(bubble.group).to({ x: bubbleBg.width/2+(letterClickCount * bubbleBg.width), y: (game.height - bubbleBg.height/2)},400, Phaser.Easing.Cubic.Out, true, 0);
             // game.add.tween(bubbleText).to({ x: 100+ (letterClickCount * bubble.width), y: (game.height - bubble.height)},400, Phaser.Easing.Cubic.Out, true, 0);
             letterClickCount++;  
           }
-          console.log('click',bubbleClicked);
+          // console.log('click',bubbleClicked);
       }
-          // console.log('WORD',wordGenArray,bubbleClicked);
+          // // console.log('WORD',wordGenArray,bubbleClicked);
 
 
         // function sortbubbleClicked(sequence){
@@ -315,15 +316,88 @@ function playState(){
 
       alphaJuice.on("request", generateBubble);
 
-  },
-    update: function(){
+
+      function decrementTimer(){
+        timer--;
+        timerText.text = timer;
+      }
+
+      function setTimer(){
+        // timerCircle = game.add.graphics(0,0);
+        // timerCircle.clear();
+        // timerCircle.lineStyle(4, 0xFFD700);
+        // timerCircle.arc(game.width - 110*game_scale,120*game_scale, 30, 0, game.math.degToRad(360), false);
+
+        timerText = game.add.text(game.width - 65*game_scale,180*game_scale,timer,{ font: "40px Boogaloo", fill: "#FFD700", align: "center"});
+        timerText.anchor.setTo(1,1);
+      }
+      console.log(Phaser.Plugin.StateTransition.Out);
+      function startTimer(){
+        timer = 30;
+        timerFunc = setInterval(function(){
+          if(timer > 0){
+            decrementTimer();
+          }else{
+            pauseTimer();
+            console.log('The game should end here');
+            changeState('endState')
+          }
+        },1000)
+      }
 
 
 
 
-    }
+      function pauseTimer(){
+        clearInterval(timerFunc);
+      }
+
+      function resetTimer(){
+        timer = 30;
+      }
+
+      setTimer();
+      startTimer();
 
 
+      function renderDj(){
+        dj = game.add.sprite(game.world.width/2+150*game_scale,game.world.height-400*game_scale,'dj');
+        dj.anchor.setTo(0.5,0.5);
+        dj.scale.setTo(2.5*game_scale)
+        dj.animations.add('shakeHead');
+        dj.animations.play('shakeHead',34,true);
+      }
+
+      renderDj();
+      
+      function playBgAudio(){
+        if(!bgAudio){
+          bgAudio = game.add.audio('bgAudio');
+          bgAudio.play();
+        }
+        bgAudio.volume = 1;
+      }
+
+      playBgAudio();
+  }
+  
+  function changeState(state){
+    // var slideIn = Phaser.Plugin.StateTransition.In,        
+        var slideOut = Phaser.Plugin.StateTransition.Out.SlideRight;        
+        var slideIn = Phaser.Plugin.StateTransition.In.SlideLeft;
+        slideIn.duration = 300;
+        slideOut.duration = 300;
+        phaserGame.state.start(state,slideOut,slideIn,true,false,{score : alphaJuice.score, bgAudioHandler : bgAudio});
+        // phaserGame.game.state.start()        
+  }
+
+  function init(params){
+    bgAudio = params.bgAudioHandler;
+  }
+
+  return {
+    preload : preload,
+    create : create,
   }
 
 }
